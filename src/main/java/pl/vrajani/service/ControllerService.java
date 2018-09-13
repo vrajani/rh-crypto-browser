@@ -49,7 +49,11 @@ public class ControllerService {
     public void performCheck(){
         log.info("Initiating the check::::");
         synchronized (this){
-            System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver");
+            String path = "src/main/resources/chromedriver";
+            if (System.getenv("OS").equalsIgnoreCase("windows")){
+                path = path + ".exe";
+            }
+            System.setProperty("webdriver.chrome.driver", path);
 
             if (driver == null){
                driver = new ChromeDriver();
