@@ -27,7 +27,8 @@ public class PriceReaderService {
                 .withCost(cost)
                 .withCount(count)
                 .withDay1diff(diff1day)
-                .withHour1diff(diff1hour);
+                .withHour1diff(diff1hour)
+                .withPrice(equity/count);
     }
 
     private String parseDiff(String text) {

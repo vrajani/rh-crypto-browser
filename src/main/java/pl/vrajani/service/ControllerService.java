@@ -44,6 +44,8 @@ public class ControllerService {
     @Autowired
     private ActionService actionService;
 
+    private Double lastBuyPrice = 50.31;
+    private Double lastSellPrice = 53.87;
 
     @Scheduled(fixedRate = 300000)
     public void performCheck(){
@@ -58,6 +60,7 @@ public class ControllerService {
             if (driver == null){
                driver = new ChromeDriver();
                chromeDriverService.openRH(driver);
+               System.setProperty("isStart","true");
                log.info("Opening RH first time.....");
            } else {
                 log.info("RH is already open.");
@@ -74,11 +77,11 @@ public class ControllerService {
             try {
                 log.info("Working with Crypto: " + str);
 
-                ThreadWait.waitFor(5000);
+                ThreadWait.waitFor(7000);
                 driver.findElement(By.partialLinkText(str)).click();
                 log.info("Reached on crypto page for symbol: " + str);
 
-                ThreadWait.waitFor(2000);
+                ThreadWait.waitFor(3000);
                 checkCryptoWithSymbol(str);
 
             } catch (Exception ex){
@@ -94,16 +97,19 @@ public class ControllerService {
 
         CryptoCurrencyBuilder cryptoCurrencyBuilder = new CryptoCurrencyBuilder(str);
         priceReaderService.readCurrentPrices(cryptoCurrencyBuilder, driver);
-        stateLoadService.readState(cryptoCurrencyBuilder, str);
-
+        //stateLoadService.readState(cryptoCurrencyBuilder, str);
+        cryptoCurrencyBuilder.withLastBuyPrice(lastBuyPrice)
+                .withLastSalePrice(lastSellPrice);
         CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
         log.info("Crypto Details: "+ cryptoCurrency.toString());
 
         if (analyseSell.analyse(cryptoCurrency)){
             log.info(cryptoCurrency.getSymbol() + ": Selling at price - "+cryptoCurrency.getPrice());
+            lastSellPrice = cryptoCurrency.getPrice();
             //actionService.sell(cryptoCurrency);
         } else if (analyseBuy.analyse(cryptoCurrency)){
             log.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
+            lastBuyPrice = cryptoCurrency.getPrice();
             //actionService.buy(cryptoCurrency);
         } else {
             log.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());

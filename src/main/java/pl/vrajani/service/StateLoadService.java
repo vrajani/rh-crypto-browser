@@ -19,8 +19,13 @@ public class StateLoadService {
         try {
             CryptoCurrencyStatus currencyStatus = objectMapper.readValue(new File("src/main/resources/status/"+ symbol.toLowerCase()+".json"), CryptoCurrencyStatus.class);
 
-            builder.withLastBuyPrice(currencyStatus.getLastBuyPrice())
-                    .withLastSalePrice(currencyStatus.getLastSalePrice());
+            if(System.getProperty("isStart").equalsIgnoreCase("true")) {
+                builder.withLastBuyPrice(50.31)
+                        .withLastSalePrice(53.87);
+                System.setProperty("isStart","false");
+
+
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

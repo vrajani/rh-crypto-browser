@@ -28,7 +28,7 @@ public class AnalyseBuy implements Analyser {
             return false;
         }
 
-        if (cryptoCurrency.getDay1diff() >= -4 || cryptoCurrency.getHour1diff() >= -1.5 ){
+        if (cryptoCurrency.getDay1diff() <= -4 || cryptoCurrency.getHour1diff() <= -1.5 ){
             log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: not lower enough yet - "+cryptoCurrency.getPrice());
             return false;
         }
