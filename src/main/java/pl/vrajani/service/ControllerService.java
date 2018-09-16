@@ -46,6 +46,8 @@ public class ControllerService {
 
     private Double lastBuyPrice = 50.31;
     private Double lastSellPrice = 53.87;
+    private int buyCount = 0;
+    private int sellCount = 0;
 
     @Scheduled(fixedRate = 300000)
     public void performCheck(){
@@ -103,14 +105,16 @@ public class ControllerService {
         CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
         log.info("Crypto Details: "+ cryptoCurrency.toString());
 
-        if (analyseSell.analyse(cryptoCurrency)){
+        if (sellCount < 4 && analyseSell.analyse(cryptoCurrency)){
             log.info(cryptoCurrency.getSymbol() + ": Selling at price - "+cryptoCurrency.getPrice());
             lastSellPrice = cryptoCurrency.getPrice();
-            //actionService.sell(cryptoCurrency);
-        } else if (analyseBuy.analyse(cryptoCurrency)){
+            actionService.sell(cryptoCurrency, driver);
+            sellCount++;
+        } else if (buyCount < 4 && analyseBuy.analyse(cryptoCurrency)){
             log.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
             lastBuyPrice = cryptoCurrency.getPrice();
-            //actionService.buy(cryptoCurrency);
+            actionService.buy(cryptoCurrency, driver);
+            buyCount++;
         } else {
             log.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
         }

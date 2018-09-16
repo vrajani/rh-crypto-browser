@@ -16,7 +16,7 @@ public class AnalyseBuy implements Analyser {
             return false;
         }
 
-        if(cryptoCurrency.getLastBuyPrice() <= cryptoCurrency.getPrice() &&
+        if(cryptoCurrency.getLastBuyPrice() >= cryptoCurrency.getPrice() ||
                 getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getLastBuyPrice()) < 98.0){
             log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: close or higher than last buy - "+cryptoCurrency.getLastBuyPrice());
             return false;
@@ -28,7 +28,7 @@ public class AnalyseBuy implements Analyser {
             return false;
         }
 
-        if (cryptoCurrency.getDay1diff() <= -4 && cryptoCurrency.getHour1diff() <= -1.25 ){
+        if (cryptoCurrency.getDay1diff() >= -4 && cryptoCurrency.getHour1diff() >= -1.25 ){
             log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: not lower enough yet - "+cryptoCurrency.getPrice());
             return false;
         }

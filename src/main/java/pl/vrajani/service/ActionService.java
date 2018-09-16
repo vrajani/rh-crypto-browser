@@ -4,6 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Service;
 import pl.vrajani.model.CryptoCurrency;
+import pl.vrajani.utility.ThreadWait;
 
 @Service
 public class ActionService {
@@ -11,16 +12,22 @@ public class ActionService {
     public final static String AMOUNT = "2";
 
     protected void buy(CryptoCurrency cryptoCurrency, WebDriver driver){
-        driver.findElement(By.partialLinkText("Buy")).click();
-        driver.findElement(By.xpath("")).sendKeys(AMOUNT);
-        driver.findElement(By.partialLinkText("Review")).click();
-        driver.findElement(By.partialLinkText("Submit")).click();
+        ThreadWait.waitFor(2000);
+        driver.findElement(By.xpath("//h3[text()='Sell LTC']")).click();
+        driver.findElement(By.name("amount")).sendKeys(AMOUNT);
+        ThreadWait.waitFor(2000);
+        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        ThreadWait.waitFor(2000);
+        driver.findElement(By.xpath("//button[@type='submit']")).click();
     }
 
     protected void sell(CryptoCurrency cryptoCurrency, WebDriver driver){
-        driver.findElement(By.partialLinkText("Sell")).click();
-        driver.findElement(By.xpath("")).sendKeys(AMOUNT);
-        driver.findElement(By.partialLinkText("Review")).click();
-        driver.findElement(By.partialLinkText("Submit")).click();
+        ThreadWait.waitFor(2000);//
+        driver.findElement(By.xpath("//span[text()='Sell LTC']")).click();
+        driver.findElement(By.name("amount")).sendKeys(AMOUNT);
+        ThreadWait.waitFor(2000);
+        driver.findElement(By.xpath("//button[@type='submit']")).click();
+        ThreadWait.waitFor(2000);
+        driver.findElement(By.xpath("//button[@type='submit']")).click();
     }
 }
