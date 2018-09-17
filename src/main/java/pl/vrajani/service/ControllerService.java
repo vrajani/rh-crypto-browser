@@ -17,13 +17,13 @@ import pl.vrajani.utility.ThreadWait;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ControllerService {
-    Logger log = LoggerFactory.getLogger(ControllerService.class);
+    private static Logger LOG = LoggerFactory.getLogger(ControllerService.class);
 
     private static final List<String> CRYPTO = Arrays.asList(new String[]{"LTC","BCH"});
-
 
     private WebDriver driver;
 
@@ -43,35 +43,29 @@ public class ControllerService {
     private ActionService actionService;
 
     @Autowired
-    private CryptoCurrencyStatus bchCryptoCurrencyStatus;
-
-    @Autowired
-    private CryptoCurrencyStatus ltcCryptoCurrencyStatus;
-
-    private int buyCount = 0;
-    private int sellCount = 0;
+    private Map<String, CryptoCurrencyStatus> cryptoCurrencyStatusMap;
 
     @Scheduled(fixedRate = 150000)
     public void performCheck(){
-        log.info("Initiating the check::::");
+        LOG.info("Initiating the check::::");
         synchronized (this){
-            String path = "src/main/resources/chromedriver";
-            if (System.getenv("OS").equalsIgnoreCase("windows")){
-                path = path + ".exe";
-            }
-            System.setProperty("webdriver.chrome.driver", path);
-
             if (driver == null){
-               driver = new ChromeDriver();
-               chromeDriverService.openRH(driver);
-               System.setProperty("isStart","true");
-               log.info("Opening RH first time.....");
+                String path = "src/main/resources/chromedriver";
+                if (System.getenv("OS").equalsIgnoreCase("windows")){
+                    path = path + ".exe";
+                }
+                System.setProperty("webdriver.chrome.driver", path);
+
+                driver = new ChromeDriver();
+                chromeDriverService.openRH(driver);
+                System.setProperty("isStart","true");
+                LOG.info("Opening RH first time.....");
            } else {
-                log.info("RH is already open.");
+                LOG.info("RH is already open.");
             }
         }
 
-        log.info("Logged into RH");
+        LOG.info("Logged into RH");
 
         checkAllCrypto();
     }
@@ -79,19 +73,19 @@ public class ControllerService {
     private void checkAllCrypto() {
         CRYPTO.stream().forEach(str -> {
             try {
-                log.info("Working with Crypto: " + str);
+                LOG.info("Working with Crypto: " + str);
 
                 ThreadWait.waitFor(7000);
                 driver.findElement(By.partialLinkText(str)).click();
-                log.info("Reached on crypto page for symbol: " + str);
+                LOG.info("Reached on crypto page for symbol: " + str);
 
                 ThreadWait.waitFor(3000);
                 checkCryptoWithSymbol(str);
 
             } catch (Exception ex){
-                log.error("Exception occured::: ",ex);
+                LOG.error("Exception occured::: ",ex);
             } finally {
-                log.info("Going back to Home page !!");
+                LOG.info("Going back to Home page !!");
                 driver.findElement(By.partialLinkText("Home")).click();
             }
         });
@@ -102,36 +96,27 @@ public class ControllerService {
         CryptoCurrencyBuilder cryptoCurrencyBuilder = new CryptoCurrencyBuilder(str);
         priceReaderService.readCurrentPrices(cryptoCurrencyBuilder, driver);
 
-        if(str.equalsIgnoreCase("bch")){
-            cryptoCurrencyBuilder.withLastBuyPrice(bchCryptoCurrencyStatus.getLastBuyPrice())
-                    .withLastSalePrice(bchCryptoCurrencyStatus.getLastSalePrice());
-        } else{
-            cryptoCurrencyBuilder.withLastBuyPrice(ltcCryptoCurrencyStatus.getLastBuyPrice())
-                    .withLastSalePrice(ltcCryptoCurrencyStatus.getLastSalePrice());
-        }
-        CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
-        log.info("Crypto Details: "+ cryptoCurrency.toString());
+        CryptoCurrencyStatus currencyStatus = cryptoCurrencyStatusMap.get(str);
+        cryptoCurrencyBuilder.withLastBuyPrice(currencyStatus.getLastBuyPrice())
+                    .withLastSalePrice(currencyStatus.getLastSalePrice());
 
-        if (sellCount < 4 && analyseSell.analyse(cryptoCurrency)) {
-            log.info(cryptoCurrency.getSymbol() + ": Selling at price - " + cryptoCurrency.getPrice());
+        CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
+        LOG.info("Crypto Details: "+ cryptoCurrency.toString());
+
+        if (cryptoCurrency.getLimitSellCount() > 0 && analyseSell.analyse(cryptoCurrency)) {
+            LOG.info(cryptoCurrency.getSymbol() + ": Selling at price - " + cryptoCurrency.getPrice());
             actionService.sell(cryptoCurrency, driver);
-            if (cryptoCurrency.getSymbol().equalsIgnoreCase("bch")) {
-                bchCryptoCurrencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
-            } else {
-                ltcCryptoCurrencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
-            }
-            sellCount++;
-        } else if (buyCount < 4 && analyseBuy.analyse(cryptoCurrency)){
-            log.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
+            currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
+            cryptoCurrency.setLimitSellCount(cryptoCurrency.getLimitSellCount()-1);
+
+        } else if (cryptoCurrency.getLimitBuyCount() > 0 && analyseBuy.analyse(cryptoCurrency)){
+            LOG.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
             actionService.buy(cryptoCurrency, driver);
-            if(cryptoCurrency.getSymbol().equalsIgnoreCase("bch")){
-                bchCryptoCurrencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
-            } else{
-                ltcCryptoCurrencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
-            }
-            buyCount++;
+            currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
+            cryptoCurrency.setLimitBuyCount(cryptoCurrency.getLimitBuyCount()-1);
+
         } else {
-            log.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
+            LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
         }
     }
 }

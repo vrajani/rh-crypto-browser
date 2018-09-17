@@ -5,6 +5,8 @@ public class CryptoCurrencyStatus {
     String symbol;
     Double lastBuyPrice;
     Double lastSalePrice;
+    int limitBuyCount = 0;
+    int limitSellCount = 0;
 
     public Double getLastBuyPrice() {
         return lastBuyPrice;
@@ -28,5 +30,21 @@ public class CryptoCurrencyStatus {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public int getLimitBuyCount() {
+        return limitBuyCount;
+    }
+
+    public void setLimitBuyCount(int limitBuyCount) {
+        this.limitBuyCount = limitBuyCount;
+    }
+
+    public int getLimitSellCount() {
+        return limitSellCount;
+    }
+
+    public void setLimitSellCount(int limitSellCount) {
+        this.limitSellCount = limitSellCount;
     }
 }
