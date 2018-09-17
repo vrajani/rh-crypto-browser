@@ -7,7 +7,7 @@ public class CryptoCurrencyStatus {
     Double lastSalePrice;
     int limitBuyCount = 0;
     int limitSellCount = 0;
-    private long durationWait;
+    long durationWait;
 
     public Double getLastBuyPrice() {
         return lastBuyPrice;

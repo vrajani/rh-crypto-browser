@@ -1,8 +1,1 @@
-{
-  "symbol": "LTC",
-  "lastBuyPrice": 50.31,
-  "lastSalePrice": 53.87,
-  "limitBuyCount": 4,
-  "limitSellCount": 4,
-  "durationWait" : 0
-}
+{"symbol":"LTC","lastBuyPrice":51.99507912892725,"lastSalePrice":53.87,"limitBuyCount":4,"limitSellCount":4,"durationWait":0}

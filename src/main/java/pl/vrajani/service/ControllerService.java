@@ -113,7 +113,7 @@ public class ControllerService {
             LOG.info(cryptoCurrency.getSymbol() + ": Selling at price - " + cryptoCurrency.getPrice());
             actionService.sell(cryptoCurrency, driver);
             currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
-            currencyStatus.setLimitSellCount(cryptoCurrency.getLimitSellCount()-1);
+            currencyStatus.setLimitSellCount(currencyStatus.getLimitSellCount()-1);
             currencyStatus.setDurationWait(60000);
 
         } else if (currencyStatus.getLimitBuyCount() > 0 && currencyStatus.getDurationWait() <=0
@@ -121,7 +121,7 @@ public class ControllerService {
             LOG.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
             actionService.buy(cryptoCurrency, driver);
             currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
-            currencyStatus.setLimitBuyCount(cryptoCurrency.getLimitBuyCount()-1);
+            currencyStatus.setLimitBuyCount(currencyStatus.getLimitBuyCount()-1);
             currencyStatus.setDurationWait(60000);
         } else {
             LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
@@ -129,7 +129,7 @@ public class ControllerService {
 
         if(currencyStatus.getDurationWait() >= INTERVAL_RATE){
             currencyStatus.setDurationWait(currencyStatus.getDurationWait() - INTERVAL_RATE);
-        } else {
+        } else if (currencyStatus.getDurationWait() > 0){
             currencyStatus.setDurationWait(0);
         }
 
