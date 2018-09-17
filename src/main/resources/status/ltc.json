@@ -3,5 +3,6 @@
   "lastBuyPrice": 50.31,
   "lastSalePrice": 53.87,
   "limitBuyCount": 4,
-  "limitSellCount": 4
+  "limitSellCount": 4,
+  "durationWait" : 0
 }

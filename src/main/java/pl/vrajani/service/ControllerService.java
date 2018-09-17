@@ -15,6 +15,7 @@ import pl.vrajani.service.analyse.AnalyseBuy;
 import pl.vrajani.service.analyse.AnalyseSell;
 import pl.vrajani.utility.ThreadWait;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class ControllerService {
     private static final List<String> CRYPTO = Arrays.asList(new String[]{"LTC","BCH"});
 
     private WebDriver driver;
+    private static final long INTERVAL_RATE = 150000;
 
     @Autowired
     private ChromeDriverService chromeDriverService;
@@ -43,9 +45,12 @@ public class ControllerService {
     private ActionService actionService;
 
     @Autowired
+    private StateLoadService stateLoadService;
+
+    @Autowired
     private Map<String, CryptoCurrencyStatus> cryptoCurrencyStatusMap;
 
-    @Scheduled(fixedRate = 150000)
+    @Scheduled(fixedRate = INTERVAL_RATE)
     public void performCheck(){
         LOG.info("Initiating the check::::");
         synchronized (this){
@@ -91,7 +96,7 @@ public class ControllerService {
         });
     }
 
-    private void checkCryptoWithSymbol(String str) {
+    private void checkCryptoWithSymbol(String str) throws IOException {
 
         CryptoCurrencyBuilder cryptoCurrencyBuilder = new CryptoCurrencyBuilder(str);
         priceReaderService.readCurrentPrices(cryptoCurrencyBuilder, driver);
@@ -103,20 +108,32 @@ public class ControllerService {
         CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
         LOG.info("Crypto Details: "+ cryptoCurrency.toString());
 
-        if (cryptoCurrency.getLimitSellCount() > 0 && analyseSell.analyse(cryptoCurrency)) {
+        if (currencyStatus.getLimitSellCount() > 0 && currencyStatus.getDurationWait() <=0
+                && analyseSell.analyse(cryptoCurrency)) {
             LOG.info(cryptoCurrency.getSymbol() + ": Selling at price - " + cryptoCurrency.getPrice());
             actionService.sell(cryptoCurrency, driver);
             currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
-            cryptoCurrency.setLimitSellCount(cryptoCurrency.getLimitSellCount()-1);
+            currencyStatus.setLimitSellCount(cryptoCurrency.getLimitSellCount()-1);
+            currencyStatus.setDurationWait(60000);
 
-        } else if (cryptoCurrency.getLimitBuyCount() > 0 && analyseBuy.analyse(cryptoCurrency)){
+        } else if (currencyStatus.getLimitBuyCount() > 0 && currencyStatus.getDurationWait() <=0
+                && analyseBuy.analyse(cryptoCurrency)){
             LOG.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
             actionService.buy(cryptoCurrency, driver);
             currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
-            cryptoCurrency.setLimitBuyCount(cryptoCurrency.getLimitBuyCount()-1);
-
+            currencyStatus.setLimitBuyCount(cryptoCurrency.getLimitBuyCount()-1);
+            currencyStatus.setDurationWait(60000);
         } else {
             LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
         }
+
+        if(currencyStatus.getDurationWait() >= INTERVAL_RATE){
+            currencyStatus.setDurationWait(currencyStatus.getDurationWait() - INTERVAL_RATE);
+        } else {
+            currencyStatus.setDurationWait(0);
+        }
+
+        //Finally save the new state, for just in case.
+        stateLoadService.save(currencyStatus);
     }
 }

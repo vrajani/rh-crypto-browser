@@ -19,4 +19,7 @@ public class StateLoadService {
                     CryptoCurrencyStatus.class);
     }
 
+    public void save(CryptoCurrencyStatus currencyStatus) throws IOException {
+        objectMapper.writeValue(new File("src/main/resources/status/"+ currencyStatus.getSymbol().toLowerCase()+".json"), currencyStatus);
+    }
 }
