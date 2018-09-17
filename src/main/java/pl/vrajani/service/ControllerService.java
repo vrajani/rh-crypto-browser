@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import pl.vrajani.model.CryptoCurrency;
 import pl.vrajani.model.CryptoCurrencyBuilder;
+import pl.vrajani.model.CryptoCurrencyStatus;
 import pl.vrajani.service.analyse.AnalyseBuy;
 import pl.vrajani.service.analyse.AnalyseSell;
 import pl.vrajani.utility.ThreadWait;
@@ -21,7 +22,7 @@ import java.util.List;
 public class ControllerService {
     Logger log = LoggerFactory.getLogger(ControllerService.class);
 
-    private static final List<String> CRYPTO = Arrays.asList(new String[]{"LTC"});
+    private static final List<String> CRYPTO = Arrays.asList(new String[]{"LTC","BCH"});
 
 
     private WebDriver driver;
@@ -33,9 +34,6 @@ public class ControllerService {
     private PriceReaderService priceReaderService;
 
     @Autowired
-    private StateLoadService stateLoadService;
-
-    @Autowired
     private AnalyseBuy analyseBuy;
 
     @Autowired
@@ -44,12 +42,16 @@ public class ControllerService {
     @Autowired
     private ActionService actionService;
 
-    private Double lastBuyPrice = 50.31;
-    private Double lastSellPrice = 53.87;
+    @Autowired
+    private CryptoCurrencyStatus bchCryptoCurrencyStatus;
+
+    @Autowired
+    private CryptoCurrencyStatus ltcCryptoCurrencyStatus;
+
     private int buyCount = 0;
     private int sellCount = 0;
 
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 150000)
     public void performCheck(){
         log.info("Initiating the check::::");
         synchronized (this){
@@ -99,21 +101,34 @@ public class ControllerService {
 
         CryptoCurrencyBuilder cryptoCurrencyBuilder = new CryptoCurrencyBuilder(str);
         priceReaderService.readCurrentPrices(cryptoCurrencyBuilder, driver);
-        //stateLoadService.readState(cryptoCurrencyBuilder, str);
-        cryptoCurrencyBuilder.withLastBuyPrice(lastBuyPrice)
-                .withLastSalePrice(lastSellPrice);
+
+        if(str.equalsIgnoreCase("bch")){
+            cryptoCurrencyBuilder.withLastBuyPrice(bchCryptoCurrencyStatus.getLastBuyPrice())
+                    .withLastSalePrice(bchCryptoCurrencyStatus.getLastSalePrice());
+        } else{
+            cryptoCurrencyBuilder.withLastBuyPrice(ltcCryptoCurrencyStatus.getLastBuyPrice())
+                    .withLastSalePrice(ltcCryptoCurrencyStatus.getLastSalePrice());
+        }
         CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
         log.info("Crypto Details: "+ cryptoCurrency.toString());
 
-        if (sellCount < 4 && analyseSell.analyse(cryptoCurrency)){
-            log.info(cryptoCurrency.getSymbol() + ": Selling at price - "+cryptoCurrency.getPrice());
-            lastSellPrice = cryptoCurrency.getPrice();
+        if (sellCount < 4 && analyseSell.analyse(cryptoCurrency)) {
+            log.info(cryptoCurrency.getSymbol() + ": Selling at price - " + cryptoCurrency.getPrice());
             actionService.sell(cryptoCurrency, driver);
+            if (cryptoCurrency.getSymbol().equalsIgnoreCase("bch")) {
+                bchCryptoCurrencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
+            } else {
+                ltcCryptoCurrencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
+            }
             sellCount++;
         } else if (buyCount < 4 && analyseBuy.analyse(cryptoCurrency)){
             log.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
-            lastBuyPrice = cryptoCurrency.getPrice();
             actionService.buy(cryptoCurrency, driver);
+            if(cryptoCurrency.getSymbol().equalsIgnoreCase("bch")){
+                bchCryptoCurrencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
+            } else{
+                ltcCryptoCurrencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
+            }
             buyCount++;
         } else {
             log.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());

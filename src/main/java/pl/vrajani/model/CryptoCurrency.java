@@ -7,6 +7,9 @@ public class CryptoCurrency extends CryptoCurrencyStatus {
     private Double day1diff;
     private Double hour1diff;
     private Double cost;
+    private Double avgCost;
+    private Double equity;
+    private Double count;
 
     public CryptoCurrency(CryptoCurrencyBuilder builder){
         this.symbol = builder.symbol;
@@ -39,6 +42,18 @@ public class CryptoCurrency extends CryptoCurrencyStatus {
 
     public Double getCost() {
         return cost;
+    }
+
+    public Double getAvgCost() {
+        return avgCost;
+    }
+
+    public Double getEquity() {
+        return equity;
+    }
+
+    public Double getCount() {
+        return count;
     }
 
     @Override

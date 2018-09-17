@@ -13,7 +13,7 @@ public class ActionService {
 
     protected void buy(CryptoCurrency cryptoCurrency, WebDriver driver){
         ThreadWait.waitFor(2000);
-        driver.findElement(By.xpath("//h3[text()='Sell LTC']")).click();
+        //driver.findElement(By.xpath("//h3[text()='Sell LTC']")).click();
         driver.findElement(By.name("amount")).sendKeys(AMOUNT);
         ThreadWait.waitFor(2000);
         driver.findElement(By.xpath("//button[@type='submit']")).click();
@@ -23,7 +23,7 @@ public class ActionService {
 
     protected void sell(CryptoCurrency cryptoCurrency, WebDriver driver){
         ThreadWait.waitFor(2000);//
-        driver.findElement(By.xpath("//span[text()='Sell LTC']")).click();
+        driver.findElement(By.xpath("//span[text()='Sell "+cryptoCurrency.getSymbol()+"']")).click();
         driver.findElement(By.name("amount")).sendKeys(AMOUNT);
         ThreadWait.waitFor(2000);
         driver.findElement(By.xpath("//button[@type='submit']")).click();

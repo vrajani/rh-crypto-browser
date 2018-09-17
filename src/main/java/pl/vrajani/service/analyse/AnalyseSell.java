@@ -11,7 +11,7 @@ public class AnalyseSell implements Analyser {
 
     @Override
     public boolean analyse(CryptoCurrency cryptoCurrency) {
-        if (cryptoCurrency.getEquity() <= 100){
+        if (cryptoCurrency.getEquity() <= 50){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: equity is high - "+cryptoCurrency.getEquity());
             return false;
         }
@@ -28,7 +28,7 @@ public class AnalyseSell implements Analyser {
             return false;
         }
 
-        if (cryptoCurrency.getDay1diff() <=4 || cryptoCurrency.getHour1diff() <= 0.75 ){
+        if (cryptoCurrency.getDay1diff() <=4 && cryptoCurrency.getHour1diff() <= 0.75 ){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: not higher enough yet - "+cryptoCurrency.getPrice());
             return false;
         }

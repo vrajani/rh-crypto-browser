@@ -5,9 +5,6 @@ public class CryptoCurrencyStatus {
     String symbol;
     Double lastBuyPrice;
     Double lastSalePrice;
-    Double avgCost;
-    Double equity;
-    Double count;
 
     public Double getLastBuyPrice() {
         return lastBuyPrice;
@@ -23,30 +20,6 @@ public class CryptoCurrencyStatus {
 
     public void setLastSalePrice(Double lastSalePrice) {
         this.lastSalePrice = lastSalePrice;
-    }
-
-    public Double getAvgCost() {
-        return avgCost;
-    }
-
-    public void setAvgCost(Double avgCost) {
-        this.avgCost = avgCost;
-    }
-
-    public Double getEquity() {
-        return equity;
-    }
-
-    public void setEquity(Double equity) {
-        this.equity = equity;
-    }
-
-    public Double getCount() {
-        return count;
-    }
-
-    public void setCount(Double count) {
-        this.count = count;
     }
 
     public String getSymbol() {
