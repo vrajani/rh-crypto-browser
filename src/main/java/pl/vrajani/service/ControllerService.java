@@ -122,7 +122,7 @@ public class ControllerService {
             actionService.sell(cryptoCurrency, driver);
             currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
             currencyStatus.setLimitSellCount(currencyStatus.getLimitSellCount()-1);
-            currencyStatus.setDurationWait(60000);
+            currencyStatus.setDurationWait(INTERVAL_RATE * 4);
 
         } else if (currencyStatus.getLimitBuyCount() > 0 && currencyStatus.getDurationWait() <=0
                 && analyseBuy.analyse(cryptoCurrency)){
@@ -130,15 +130,14 @@ public class ControllerService {
             actionService.buy(cryptoCurrency, driver);
             currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
             currencyStatus.setLimitBuyCount(currencyStatus.getLimitBuyCount()-1);
-            currencyStatus.setDurationWait(60000);
+            currencyStatus.setDurationWait(INTERVAL_RATE * 4);
         } else {
             LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
-        }
-
-        if(currencyStatus.getDurationWait() >= INTERVAL_RATE){
-            currencyStatus.setDurationWait(currencyStatus.getDurationWait() - INTERVAL_RATE);
-        } else if (currencyStatus.getDurationWait() > 0){
-            currencyStatus.setDurationWait(0);
+            if(currencyStatus.getDurationWait() >= INTERVAL_RATE){
+                currencyStatus.setDurationWait(currencyStatus.getDurationWait() - INTERVAL_RATE);
+            } else if (currencyStatus.getDurationWait() > 0){
+                currencyStatus.setDurationWait(0);
+            }
         }
 
         //Finally save the new state, for just in case.

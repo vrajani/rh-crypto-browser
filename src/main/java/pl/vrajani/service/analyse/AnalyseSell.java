@@ -28,6 +28,11 @@ public class AnalyseSell implements Analyser {
             return false;
         }
 
+        if(cryptoCurrency.getLimitBuyCount() == 4 && cryptoCurrency.getLimitSellCount() <= 3 ) {
+            log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: None Bought and sold once already - "+cryptoCurrency.getLastSalePrice());
+            return false;
+        }
+
         if (cryptoCurrency.getDay1diff() <=4 && cryptoCurrency.getHour1diff() <= 0.75 ){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: not higher enough yet - "+cryptoCurrency.getPrice());
             return false;
