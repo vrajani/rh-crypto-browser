@@ -3,6 +3,7 @@ package pl.vrajani.service;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,14 @@ public class ControllerService {
                 }
                 System.setProperty("webdriver.chrome.driver", path);
 
-                driver = new ChromeDriver();
+                if(System.getenv("headless").equalsIgnoreCase("false")) {
+                    driver = new ChromeDriver();
+                } else {
+                    ChromeOptions options = new ChromeOptions();
+                    options.addArguments("headless");
+                    options.addArguments("window-size=1200x600");
+                    driver = new ChromeDriver(options);
+                }
                 chromeDriverService.openRH(driver);
                 System.setProperty("isStart","true");
                 LOG.info("Opening RH first time.....");
