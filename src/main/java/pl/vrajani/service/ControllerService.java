@@ -25,10 +25,10 @@ import java.util.Map;
 public class ControllerService {
     private static Logger LOG = LoggerFactory.getLogger(ControllerService.class);
 
-    private static final List<String> CRYPTO = Arrays.asList(new String[]{"LTC","BCH"});
+    private static final List<String> CRYPTO = Arrays.asList(new String[]{"LTC","BCH","ETC"});
 
     private WebDriver driver;
-    private static final long INTERVAL_RATE = 150000;
+    private static final long INTERVAL_RATE = 180000;
 
     @Autowired
     private ChromeDriverService chromeDriverService;
@@ -67,7 +67,7 @@ public class ControllerService {
                 } else {
                     ChromeOptions options = new ChromeOptions();
                     options.addArguments("headless");
-                    options.addArguments("window-size=1200x600");
+                    options.addArguments("window-size=1400x600");
                     driver = new ChromeDriver(options);
                 }
                 chromeDriverService.openRH(driver);
@@ -111,28 +111,36 @@ public class ControllerService {
 
         CryptoCurrencyStatus currencyStatus = cryptoCurrencyStatusMap.get(str);
         cryptoCurrencyBuilder.withLastBuyPrice(currencyStatus.getLastBuyPrice())
-                    .withLastSalePrice(currencyStatus.getLastSalePrice());
+                    .withLastSalePrice(currencyStatus.getLastSalePrice())
+                    .withCurrencyStatus(currencyStatus);
 
         CryptoCurrency cryptoCurrency = cryptoCurrencyBuilder.build();
         LOG.info("Crypto Details: "+ cryptoCurrency.toString());
 
-        if (currencyStatus.getLimitSellCount() > 0 && currencyStatus.getDurationWait() <=0
-                && analyseSell.analyse(cryptoCurrency)) {
-            LOG.info(cryptoCurrency.getSymbol() + ": Selling at price - " + cryptoCurrency.getPrice());
-            actionService.sell(cryptoCurrency, driver);
-            currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
-            currencyStatus.setLimitSellCount(currencyStatus.getLimitSellCount()-1);
-            currencyStatus.setDurationWait(INTERVAL_RATE * 4);
+        if( currencyStatus.getDurationWait() <=0 ) {
+            if (currencyStatus.getLimitBuyCount() > 0 && analyseBuy.analyse(cryptoCurrency)) {
+                LOG.info(str + ": Buying at price - " + cryptoCurrency.getPrice());
+                actionService.buy(cryptoCurrency, driver);
+                currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
+                currencyStatus.setLimitBuyCount(currencyStatus.getLimitBuyCount() - 1);
+                currencyStatus.setDurationWait(INTERVAL_RATE * 4);
+            } else if (currencyStatus.getLimitSellCount() > 0 && analyseSell.analyse(cryptoCurrency)) {
+                LOG.info(str + ": Selling at price - " + cryptoCurrency.getPrice());
+                actionService.sell(cryptoCurrency, driver);
+                currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
+                currencyStatus.setLimitSellCount(currencyStatus.getLimitSellCount() - 1);
+                currencyStatus.setDurationWait(INTERVAL_RATE * 4);
 
-        } else if (currencyStatus.getLimitBuyCount() > 0 && currencyStatus.getDurationWait() <=0
-                && analyseBuy.analyse(cryptoCurrency)){
-            LOG.info(cryptoCurrency.getSymbol() + ": Buying at price - "+cryptoCurrency.getPrice());
-            actionService.buy(cryptoCurrency, driver);
-            currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
-            currencyStatus.setLimitBuyCount(currencyStatus.getLimitBuyCount()-1);
-            currencyStatus.setDurationWait(INTERVAL_RATE * 4);
-        } else {
-            LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
+            } else {
+                LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
+                if(currencyStatus.getDurationWait() >= INTERVAL_RATE){
+                    currencyStatus.setDurationWait(currencyStatus.getDurationWait() - INTERVAL_RATE);
+                } else if (currencyStatus.getDurationWait() > 0){
+                    currencyStatus.setDurationWait(0);
+                }
+            }
+        }else {
+            LOG.info(str + ": Just made a transaction with in past - "+ currencyStatus.getDurationWait());
             if(currencyStatus.getDurationWait() >= INTERVAL_RATE){
                 currencyStatus.setDurationWait(currencyStatus.getDurationWait() - INTERVAL_RATE);
             } else if (currencyStatus.getDurationWait() > 0){
@@ -140,6 +148,8 @@ public class ControllerService {
             }
         }
 
+
+        cryptoCurrencyStatusMap.put(str, currencyStatus);
         //Finally save the new state, for just in case.
         stateLoadService.save(currencyStatus);
     }

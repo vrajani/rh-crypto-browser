@@ -26,6 +26,7 @@ public class Configuration {
         Map<String, CryptoCurrencyStatus> cryptoCurrencyMap = new HashMap<>();
         cryptoCurrencyMap.put("LTC", stateLoadService.readState("ltc"));
         cryptoCurrencyMap.put("BCH", stateLoadService.readState("bch"));
+        cryptoCurrencyMap.put("ETC", stateLoadService.readState("etc"));
         return cryptoCurrencyMap;
     }
 }

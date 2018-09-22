@@ -22,6 +22,9 @@ public class CryptoCurrency extends CryptoCurrencyStatus {
         this.equity = builder.equity;
         this.count = builder.count;
         this.cost = builder.cost;
+        this.limitBuyCount = builder.limitBuyCount;
+        this.limitSellCount = builder.limitSellCount;
+        this.durationWait = builder.durationWait;
     }
 
     public String getSymbol() {

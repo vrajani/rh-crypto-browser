@@ -11,16 +11,19 @@ public class AnalyseBuy implements Analyser {
 
     @Override
     public boolean analyse(CryptoCurrency cryptoCurrency) {
-        if (cryptoCurrency.getEquity() >= 147){
-            log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: equity is high - "+cryptoCurrency.getEquity());
-            return false;
+        if(!cryptoCurrency.getSymbol().equalsIgnoreCase("etc")) {
+            if (cryptoCurrency.getEquity() >= 147) {
+                log.info(cryptoCurrency.getSymbol() + ": No Buy, Reason: equity is high - " + cryptoCurrency.getEquity());
+                return false;
+            }
         }
-
-        if(cryptoCurrency.getLastBuyPrice() <= cryptoCurrency.getPrice() ||
-                getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getLastBuyPrice()) > 98.0){
-            log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: close or higher than last buy - "+cryptoCurrency.getLastBuyPrice());
-            return false;
-        }
+//
+//        if(cryptoCurrency.getLimitBuyCount() - cryptoCurrency.getLastSalePrice() <= 0) {
+            if (getPercent(cryptoCurrency.getPrice(), cryptoCurrency.getLastBuyPrice()) > 99.00) {
+                log.info(cryptoCurrency.getSymbol() + ": No Buy, Reason: close or higher than last buy - " + cryptoCurrency.getLastBuyPrice());
+                return false;
+            }
+//        }
 
         if(cryptoCurrency.getAvgCost() <= cryptoCurrency.getPrice() &&
                 getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getAvgCost()) < 98.0){
@@ -28,12 +31,18 @@ public class AnalyseBuy implements Analyser {
             return false;
         }
 
-        if (cryptoCurrency.getDay1diff() >= -4 || cryptoCurrency.getHour1diff() >= -1.25 ){
-            log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: not lower enough yet - "+cryptoCurrency.getPrice());
-            return false;
+        if (cryptoCurrency.getDay1diff() <= -4 && cryptoCurrency.getHour1diff() <= -1.05 ){
+            log.info(cryptoCurrency.getSymbol()+": Buy, Reason: in price range - "+cryptoCurrency.getPrice());
+            return true;
         }
 
-        return true;
+        if (cryptoCurrency.getHour1diff() <= -1.30 ) {
+            log.info(cryptoCurrency.getSymbol()+": Buy, Reason: Low price since last one hour - "+cryptoCurrency.getPrice());
+            return true;
+        }
+        log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: not lower enough yet - "+cryptoCurrency.getPrice());
+
+        return false;
     }
 
     //rule1: it should be below last buy price by 3% or last sell price (iffy)

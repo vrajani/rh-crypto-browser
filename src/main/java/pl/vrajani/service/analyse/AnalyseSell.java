@@ -17,7 +17,7 @@ public class AnalyseSell implements Analyser {
         }
 
         if(cryptoCurrency.getLastSalePrice() >= cryptoCurrency.getPrice() &&
-                getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getLastSalePrice()) < 98.0){
+                getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getLastSalePrice()) > 102.0){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: close or higher than last sell - "+cryptoCurrency.getLastSalePrice());
             return false;
         }
@@ -28,17 +28,23 @@ public class AnalyseSell implements Analyser {
             return false;
         }
 
-        if(cryptoCurrency.getLimitBuyCount() == 4 && cryptoCurrency.getLimitSellCount() <= 3 ) {
+        if(cryptoCurrency.getLimitBuyCount() - cryptoCurrency.getLimitSellCount() >= 1 ) {
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: None Bought and sold once already - "+cryptoCurrency.getLastSalePrice());
             return false;
         }
 
-        if (cryptoCurrency.getDay1diff() <=4 && cryptoCurrency.getHour1diff() <= 0.75 ){
-            log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: not higher enough yet - "+cryptoCurrency.getPrice());
-            return false;
+        if (cryptoCurrency.getDay1diff() >=4 && cryptoCurrency.getHour1diff() >= 1.05 ){
+            log.info(cryptoCurrency.getSymbol()+":Sell, Reason: with in needed range - "+cryptoCurrency.getPrice());
+            return true;
         }
 
-        return true;
+        if(cryptoCurrency.getHour1diff() >= 1.30){
+            log.info(cryptoCurrency.getSymbol()+":Sell, Reason: lowered in last hour - "+cryptoCurrency.getPrice());
+            return true;
+        }
+        log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: not higher enough yet - "+cryptoCurrency.getPrice());
+
+        return false;
     }
 
     //rule1: it should be above last buy price by 3%
