@@ -14,7 +14,8 @@ public class CryptoCurrencyBuilder {
     Double cost;
     int limitBuyCount = 0;
     int limitSellCount = 0;
-    long durationWait;
+    int durationSinceLastBuy;
+    int durationSinceLastSell;
 
     public CryptoCurrencyBuilder(String symbol) {
         this.symbol = symbol;
@@ -25,7 +26,8 @@ public class CryptoCurrencyBuilder {
         this.lastSalePrice = currencyStatus.getLastSalePrice();
         this.limitBuyCount = currencyStatus.getLimitBuyCount();
         this.limitSellCount = currencyStatus.getLimitSellCount();
-        this.durationWait = currencyStatus.getDurationWait();
+        this.durationSinceLastBuy = currencyStatus.getDurationSinceLastBuy();
+        this.durationSinceLastSell = currencyStatus.getDurationSinceLastSell();
         return this;
     }
 
@@ -76,6 +78,16 @@ public class CryptoCurrencyBuilder {
 
     public CryptoCurrencyBuilder withCost(Double cost){
         this.cost = cost;
+        return this;
+    }
+
+    public CryptoCurrencyBuilder withDurationSinceLastSell (int durationSinceLastSell){
+        this.durationSinceLastSell = durationSinceLastSell;
+        return this;
+    }
+
+    public CryptoCurrencyBuilder withDurationSinceLastBuy (int durationSinceLastBuy){
+        this.durationSinceLastBuy = durationSinceLastBuy;
         return this;
     }
 

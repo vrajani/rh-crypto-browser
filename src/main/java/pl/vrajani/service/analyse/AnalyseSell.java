@@ -11,19 +11,17 @@ public class AnalyseSell implements Analyser {
 
     @Override
     public boolean analyse(CryptoCurrency cryptoCurrency) {
-        if (cryptoCurrency.getEquity() <= 50){
+        if (cryptoCurrency.getEquity() <= 30){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: equity is high - "+cryptoCurrency.getEquity());
             return false;
         }
 
-        if(cryptoCurrency.getLastSalePrice() >= cryptoCurrency.getPrice() &&
-                getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getLastSalePrice()) > 102.0){
+        if(getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getLastSalePrice()) < 101.50){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: close or higher than last sell - "+cryptoCurrency.getLastSalePrice());
             return false;
         }
 
-        if(cryptoCurrency.getLastBuyPrice() > cryptoCurrency.getPrice() &&
-                getPercent(cryptoCurrency.getLastBuyPrice(), cryptoCurrency.getPrice()) < 98.0){
+        if(getPercent(cryptoCurrency.getLastBuyPrice(), cryptoCurrency.getPrice()) > 98.50){
             log.info(cryptoCurrency.getSymbol()+": No Sell, Reason: close or higher than last buy - "+cryptoCurrency.getLastBuyPrice());
             return false;
         }
@@ -33,12 +31,12 @@ public class AnalyseSell implements Analyser {
             return false;
         }
 
-        if (cryptoCurrency.getDay1diff() >=4 && cryptoCurrency.getHour1diff() >= 1.05 ){
+        if (cryptoCurrency.getDay1diff() >=4 && cryptoCurrency.getHour1diff() >= 1.35 ){
             log.info(cryptoCurrency.getSymbol()+":Sell, Reason: with in needed range - "+cryptoCurrency.getPrice());
             return true;
         }
 
-        if(cryptoCurrency.getHour1diff() >= 1.30){
+        if(cryptoCurrency.getHour1diff() >= 1.10){
             log.info(cryptoCurrency.getSymbol()+":Sell, Reason: lowered in last hour - "+cryptoCurrency.getPrice());
             return true;
         }

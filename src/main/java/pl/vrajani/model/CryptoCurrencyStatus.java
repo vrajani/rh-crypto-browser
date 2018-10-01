@@ -7,7 +7,8 @@ public class CryptoCurrencyStatus {
     Double lastSalePrice;
     int limitBuyCount = 0;
     int limitSellCount = 0;
-    long durationWait;
+    int durationSinceLastBuy;
+    int durationSinceLastSell;
 
     public Double getLastBuyPrice() {
         return lastBuyPrice;
@@ -49,11 +50,43 @@ public class CryptoCurrencyStatus {
         this.limitSellCount = limitSellCount;
     }
 
-    public long getDurationWait() {
-        return durationWait;
+    public int getDurationSinceLastBuy() {
+        return durationSinceLastBuy;
     }
 
-    public void setDurationWait(long durationWait) {
-        this.durationWait = durationWait;
+    public void setDurationSinceLastBuy(int durationSinceLastBuy) {
+        this.durationSinceLastBuy = durationSinceLastBuy;
+    }
+
+    public int getDurationSinceLastSell() {
+        return durationSinceLastSell;
+    }
+
+    public void setDurationSinceLastSell(int durationSinceLastSell) {
+        this.durationSinceLastSell = durationSinceLastSell;
+    }
+
+    public void decrementBuyDuration (){
+        if(durationSinceLastBuy > 0){
+            durationSinceLastBuy--;
+        }
+    }
+
+    public void incrementBuyDuration (){
+        if(durationSinceLastBuy < 1000){
+            durationSinceLastBuy++;
+        }
+    }
+
+    public void decrementSellDuration (){
+        if(durationSinceLastSell > 0){
+            durationSinceLastSell--;
+        }
+    }
+
+    public void incrementSellDuration (){
+        if(durationSinceLastSell < 1000){
+            durationSinceLastSell++;
+        }
     }
 }

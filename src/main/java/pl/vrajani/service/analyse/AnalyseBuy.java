@@ -18,25 +18,26 @@ public class AnalyseBuy implements Analyser {
             }
         }
 //
-//        if(cryptoCurrency.getLimitBuyCount() - cryptoCurrency.getLastSalePrice() <= 0) {
-            if (getPercent(cryptoCurrency.getPrice(), cryptoCurrency.getLastBuyPrice()) > 99.00) {
-                log.info(cryptoCurrency.getSymbol() + ": No Buy, Reason: close or higher than last buy - " + cryptoCurrency.getLastBuyPrice());
+        if(cryptoCurrency.getLimitBuyCount() - cryptoCurrency.getLimitSellCount() <= 0) {
+            if (getPercent(cryptoCurrency.getPrice(), cryptoCurrency.getLastBuyPrice()) > 103.50) {
+                log.info(cryptoCurrency.getSymbol() + ": No Buy, Reason: higher than last buy - " + cryptoCurrency.getLastBuyPrice());
                 return false;
             }
-//        }
-
-        if(cryptoCurrency.getAvgCost() <= cryptoCurrency.getPrice() &&
-                getPercent(cryptoCurrency.getPrice(),cryptoCurrency.getAvgCost()) < 98.0){
-            log.info(cryptoCurrency.getSymbol()+": No Buy, Reason: close or higher than average cost - "+cryptoCurrency.getAvgCost());
-            return false;
         }
 
-        if (cryptoCurrency.getDay1diff() <= -4 && cryptoCurrency.getHour1diff() <= -1.05 ){
+        if(!cryptoCurrency.getSymbol().equalsIgnoreCase("bch")) {
+            if (getPercent(cryptoCurrency.getPrice(), cryptoCurrency.getAvgCost()) > 103.50) {
+                log.info(cryptoCurrency.getSymbol() + ": No Buy, Reason: close or higher than average cost - " + cryptoCurrency.getAvgCost());
+                return false;
+            }
+        }
+
+        if (cryptoCurrency.getDay1diff() <= -4 && cryptoCurrency.getHour1diff() <= -1.35 ){
             log.info(cryptoCurrency.getSymbol()+": Buy, Reason: in price range - "+cryptoCurrency.getPrice());
             return true;
         }
 
-        if (cryptoCurrency.getHour1diff() <= -1.30 ) {
+        if (cryptoCurrency.getHour1diff() <= -1.10 ) {
             log.info(cryptoCurrency.getSymbol()+": Buy, Reason: Low price since last one hour - "+cryptoCurrency.getPrice());
             return true;
         }

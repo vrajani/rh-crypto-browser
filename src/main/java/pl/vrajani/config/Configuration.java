@@ -27,6 +27,7 @@ public class Configuration {
         cryptoCurrencyMap.put("LTC", stateLoadService.readState("ltc"));
         cryptoCurrencyMap.put("BCH", stateLoadService.readState("bch"));
         cryptoCurrencyMap.put("ETC", stateLoadService.readState("etc"));
+        cryptoCurrencyMap.put("ETH", stateLoadService.readState("eth"));
         return cryptoCurrencyMap;
     }
 }
