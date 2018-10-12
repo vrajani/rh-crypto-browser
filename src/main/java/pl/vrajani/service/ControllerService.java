@@ -122,24 +122,44 @@ public class ControllerService {
             LOG.info(str + ": Buying at price - " + cryptoCurrency.getPrice());
             actionService.buy(cryptoCurrency, driver);
             currencyStatus.setLastBuyPrice(cryptoCurrency.getPrice());
+            currencyStatus.setLastSalePrice(getPercentAmount(101.0, cryptoCurrency.getPrice()));
             currencyStatus.setLimitBuyCount(currencyStatus.getLimitBuyCount() - 1);
+            if(currencyStatus.getLimitBuyCount() - currencyStatus.getLimitSellCount() <= 2){
+                currencyStatus.setLimitSellCount(currencyStatus.getLimitSellCount() + 1);
+            }
             currencyStatus.setDurationSinceLastBuy(0);
         } else if ( currencyStatus.getDurationSinceLastSell() >= 16 && currencyStatus.getLimitSellCount() > 0
                 && analyseSell.analyse(cryptoCurrency)) {
             LOG.info(str + ": Selling at price - " + cryptoCurrency.getPrice());
             actionService.sell(cryptoCurrency, driver);
             currencyStatus.setLastSalePrice(cryptoCurrency.getPrice());
+            currencyStatus.setLastBuyPrice(getPercentAmount(99.0, cryptoCurrency.getPrice()));
             currencyStatus.setLimitSellCount(currencyStatus.getLimitSellCount() - 1);
+            if(currencyStatus.getLimitSellCount() - currencyStatus.getLimitBuyCount() <= 2){
+                currencyStatus.setLimitBuyCount(currencyStatus.getLimitBuyCount() + 1);
+            }
             currencyStatus.setDurationSinceLastSell(0);
         } else {
             LOG.info(cryptoCurrency.getSymbol() + ": Waiting at price - "+cryptoCurrency.getPrice());
         }
         currencyStatus.incrementBuyDuration();
         currencyStatus.incrementSellDuration();
-//        LOG.info(str + ": Just made a transaction with in past - "+ currencyStatus.getDurationWait());
 
+        if(currencyStatus.getDurationSinceLastBuy() > 500){
+            currencyStatus.setLastBuyPrice(getPercentAmount(98.5, cryptoCurrency.getPrice()));
+            currencyStatus.setDurationSinceLastBuy(16);
+        }
+        if(currencyStatus.getDurationSinceLastSell() > 500){
+            currencyStatus.setLastSalePrice(getPercentAmount(101.5, cryptoCurrency.getPrice()));
+            currencyStatus.setDurationSinceLastSell(16);
+        }
         cryptoCurrencyStatusMap.put(str, currencyStatus);
         //Finally save the new state, for just in case.
         stateLoadService.save(currencyStatus);
     }
+
+    private Double getPercentAmount(double percent, Double currentPrice) {
+        return (currentPrice * percent)/100;
+    }
+
 }
